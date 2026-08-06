@@ -1,5 +1,6 @@
 package com.example.ocrscanner.service.document;
 
+import com.example.ocrscanner.dto.document.DocumentResponse;
 import com.example.ocrscanner.entity.document.Document;
 import com.example.ocrscanner.exception.DocumentNotFoundException;
 import com.example.ocrscanner.repository.document.DocumentRepository;
@@ -37,7 +38,16 @@ public class DocumentService {
      * 1) 파일을 uploads 폴더에 저장
      * 2) 파일 정보(메타데이터) + OCR 텍스트를 DB에 저장
      */
-    public Document upload(MultipartFile file, String title, String tags, String ocrText) throws IOException {
+    public DocumentResponse upload(MultipartFile file, String title, String tags, String ocrText) throws IOException {
+        // 0. 업로드 파일 검증
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("이미지 파일만 업로드할 수 있습니다");
+        }
+
         // 1. uploads 폴더가 없으면 생성
         Path dir = Paths.get(uploadDir).toAbsolutePath().normalize();
         Files.createDirectories(dir);
@@ -51,38 +61,37 @@ public class DocumentService {
         Document doc = new Document();
         doc.setTitle(title != null && !title.isBlank() ? title : file.getOriginalFilename());
         doc.setFileName(storedFileName);
-        doc.setContentType(file.getContentType());
+        doc.setContentType(contentType);
         doc.setFileSize(file.getSize());
         doc.setTags(tags);
         doc.setOcrText(ocrText);
 
         // 4. DB에 저장하고, id가 채워진 결과를 반환
-        return repository.save(doc);
+        return toResponse(repository.save(doc));
     }
 
     /** 전체 문서 목록 (최신순) */
-    public List<Document> findAll() {
-        return repository.findAll().reversed();
+    public List<DocumentResponse> findAll() {
+        return repository.findAll().reversed().stream().map(this::toResponse).toList();
     }
 
     /** id로 문서 1개 조회 */
-    public Document findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new DocumentNotFoundException("문서를 찾을 수 없습니다: " + id));
+    public DocumentResponse findById(Long id) {
+        return toResponse(findDocumentById(id));
     }
 
     /** 문서 수정: null이 아닌 필드만 반영 */
-    public Document update(Long id, String title, String tags, String ocrText) {
-        Document doc = findById(id);
+    public DocumentResponse update(Long id, String title, String tags, String ocrText) {
+        Document doc = findDocumentById(id);
         if (title != null) doc.setTitle(title);
         if (tags != null) doc.setTags(tags);
         if (ocrText != null) doc.setOcrText(ocrText);
-        return repository.save(doc);
+        return toResponse(repository.save(doc));
     }
 
     /** 문서 삭제 (DB + 저장된 파일까지) */
     public void delete(Long id) throws IOException {
-        Document doc = findById(id);
+        Document doc = findDocumentById(id);
 
         // 저장된 이미지 파일 삭제
         Path filePath = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(doc.getFileName());
@@ -94,17 +103,29 @@ public class DocumentService {
 
     /** 저장된 이미지 파일의 실제 경로 반환 */
     public Path getFilePath(Long id) {
-        Document doc = findById(id);
+        Document doc = findDocumentById(id);
         return Paths.get(uploadDir).toAbsolutePath().normalize().resolve(doc.getFileName());
     }
 
     /**
      * 검색: 제목 / OCR 텍스트 / 태그 중 하나라도 키워드를 포함하면 반환
      */
-    public List<Document> search(String keyword) {
+    public List<DocumentResponse> search(String keyword) {
         return repository
                 .findByTitleContainingIgnoreCaseOrOcrTextContainingIgnoreCaseOrTagsContainingIgnoreCase(
                         keyword, keyword, keyword)
-                .reversed();
+                .reversed().stream().map(this::toResponse).toList();
+    }
+
+    /** id로 Document 엔티티를 조회 (내부용) */
+    private Document findDocumentById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException("문서를 찾을 수 없습니다: " + id));
+    }
+
+    /** Document 엔티티를 응답 DTO로 변환 */
+    private DocumentResponse toResponse(Document doc) {
+        return new DocumentResponse(
+                doc.getId(), doc.getTitle(), doc.getTags(), doc.getOcrText(), doc.getCreatedAt(), doc.getFileSize());
     }
 }
