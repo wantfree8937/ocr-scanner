@@ -1,19 +1,52 @@
 # OCR 문서 스캐너 (OCR Scanner)
 
-이미지로 된 문서(영수증, 메모, 스캔본 등)를 업로드하면 브라우저에서 바로 OCR로 텍스트를 추출하고, 서버에 저장해 나중에 검색할 수 있는 문서 관리 애플리케이션입니다.
+이미지로 된 문서(영수증, 메모, 스캔본 등)를 업로드하면 네이버 CLOVA OCR로 텍스트를 추출하고, 서버에 저장해 나중에 검색/관리할 수 있는 문서 관리 애플리케이션입니다.
 
 ## 주요 기능
 
-- **이미지 업로드**: 문서 이미지를 업로드하고 제목/태그를 함께 저장
-- **OCR 텍스트 추출**: 업로드 시 브라우저에서 [tesseract.js](https://github.com/naptha/tesseract.js)로 한국어+영어 텍스트를 자동 인식
-- **검색**: 제목, OCR로 추출된 텍스트, 태그 중 하나라도 키워드가 포함되면 검색 결과에 노출
-- **문서 목록/상세/삭제**: 업로드한 문서를 최신순으로 조회, 상세보기, 삭제 가능
+- **이미지 업로드**: 파일 선택 → 미리보기 → OCR 실행 → 텍스트 수정 → 저장
+- **OCR 텍스트 추출**: 네이버 CLOVA OCR API로 한국어+영어 텍스트 인식
+- **문서 관리**: 목록/상세/수정/삭제 (CRUD)
+- **검색**: 제목, OCR 텍스트, 태그 중 키워드가 포함된 문서 검색
+- **태그 필터**: 태그 칩 클릭으로 필터링, 태그별 문서 수 표시
+- **페이지네이션**: 12개 단위로 목록 페이지 이동
+- **다크 모드**: localStorage에 설정 유지
 
 ## 기술 스택
 
-- **백엔드**: Spring Boot 4.1.0 (Java 25), Spring Data JPA
-- **프론트엔드**: React 19, Vite 8, tesseract.js
-- **DB**: PostgreSQL 18
+| 구분 | 스택 |
+|---|---|
+| 백엔드 | Spring Boot 4.1.0 (Java 25), Spring Data JPA, Spring WebMVC |
+| 프론트엔드 | React 19, Vite 8 |
+| OCR | 네이버 CLOVA OCR (API Gateway 연동) |
+| DB | PostgreSQL 18 |
+| 테스트 | JUnit 5, MockMvc, H2 |
+
+## 프로젝트 구조
+
+```
+ocr-scanner/
+├── src/main/java/com/example/ocrscanner/
+│   ├── DocumentController.java     # Controller
+│   ├── DocumentService.java        # Service
+│   ├── DocumentRepository.java     # Repository (JPA)
+│   ├── Document.java               # Entity
+│   ├── ClovaOcrService.java        # CLOVA OCR 연동
+│   ├── ClovaOcrProperties.java     # CLOVA OCR 설정 바인딩
+│   ├── DocumentNotFoundException.java
+│   └── CorsConfig.java
+├── src/main/resources/
+│   ├── application.example.yml     # 설정 예시 (커밋 대상)
+│   └── application.yml             # 실제 설정 (git에 커밋 금지)
+├── src/test/java/com/example/ocrscanner/   # JUnit + MockMvc 테스트
+└── frontend/src/
+    ├── App.jsx
+    ├── api.js
+    └── components/
+        ├── UploadCard.jsx
+        ├── DocumentList.jsx
+        └── DocumentModal.jsx
+```
 
 ## 실행 방법
 
@@ -26,7 +59,8 @@
 CREATE DATABASE ocr_scanner;
 ```
 
-- `src/main/resources/application.yml`에서 DB 접속 정보(username/password)를 환경에 맞게 수정합니다.
+- `src/main/resources/application.example.yml`을 같은 위치에 `application.yml`로 복사한 뒤, DB 접속 정보와 CLOVA OCR API 키(Invoke URL, Secret Key)를 입력합니다.
+- `application.yml`은 API 키를 포함하므로 **git에 커밋하지 않습니다**.
 
 ### 백엔드 실행
 
@@ -34,7 +68,7 @@ CREATE DATABASE ocr_scanner;
 ./mvnw spring-boot:run
 ```
 
-기본적으로 `http://localhost:8080`에서 API가 실행됩니다.
+`http://localhost:8080`에서 API가 실행됩니다.
 
 ### 프론트엔드 실행
 
@@ -45,3 +79,25 @@ npm run dev
 ```
 
 `http://localhost:5173`(Vite 기본 포트)에서 접속할 수 있습니다.
+
+### 테스트
+
+```bash
+./mvnw test
+```
+
+H2 인메모리 DB로 실행되며, CLOVA OCR 호출은 mock 처리됩니다.
+
+## API 목록
+
+Base path: `/api/documents`
+
+| Method | Path | 설명 |
+|---|---|---|
+| POST | `/api/documents` | 문서 업로드 (multipart/form-data: file, title, tags, ocrText) |
+| GET | `/api/documents` | 전체 문서 목록 (최신순) |
+| GET | `/api/documents/search?q=키워드` | 제목/OCR텍스트/태그 검색 |
+| GET | `/api/documents/{id}` | 문서 상세 조회 |
+| GET | `/api/documents/{id}/image` | 저장된 원본 이미지 조회 |
+| PATCH | `/api/documents/{id}` | 문서 수정 |
+| DELETE | `/api/documents/{id}` | 문서 삭제 (DB + 저장 파일) |
