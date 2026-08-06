@@ -23,6 +23,7 @@ function App() {
   const [editTags, setEditTags] = useState('')
   const [editOcr, setEditOcr] = useState('')
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark') // 다크 모드 여부
+  const [activeTag, setActiveTag] = useState(null) // 선택된 태그 필터 (null이면 전체)
 
   // 화면 시작 시 문서 목록 불러오기
   const loadDocs = async () => {
@@ -140,6 +141,16 @@ function App() {
     return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
   }
 
+  // 전체 태그 목록 (중복 제거)
+  const allTags = [...new Set(
+    docs.flatMap((d) => (d.tags ? d.tags.split(',').map((t) => t.trim()) : []).filter(Boolean))
+  )]
+
+  // 태그 필터가 적용된 문서 목록
+  const visibleDocs = activeTag
+    ? docs.filter((d) => d.tags && d.tags.split(',').map((t) => t.trim()).includes(activeTag))
+    : docs
+
   return (
     <div className="app">
       <header className="header">
@@ -190,6 +201,7 @@ function App() {
 
         {/* ── 검색 + 목록 영역 ── */}
         <section className="list-section">
+          <p className="doc-count">📄 총 {visibleDocs.length}개 문서</p>
           <div className="search-row">
             <input
               className="input search-input"
@@ -200,9 +212,22 @@ function App() {
             />
             <button className="btn btn-primary" onClick={search}>검색</button>
           </div>
+          {allTags.length > 0 && (
+            <div className="tag-filter">
+              {allTags.map((t) => (
+                <button
+                  key={t}
+                  className={`filter-chip${activeTag === t ? ' active' : ''}`}
+                  onClick={() => setActiveTag((cur) => (cur === t ? null : t))}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="doc-grid">
-            {docs.length === 0 && <p className="empty">저장된 문서가 없어요. 첫 문서를 업로드해보세요! 📄</p>}
-            {docs.map((d) => (
+            {visibleDocs.length === 0 && <p className="empty">저장된 문서가 없어요. 첫 문서를 업로드해보세요! 📄</p>}
+            {visibleDocs.map((d) => (
               <div key={d.id} className="doc-card" onClick={() => setDetail(d)}>
                 <img src={`${API}/documents/${d.id}/image`} alt={d.title} className="doc-thumb" />
                 <div className="doc-info">
