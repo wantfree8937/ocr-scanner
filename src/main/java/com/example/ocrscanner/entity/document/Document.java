@@ -1,12 +1,17 @@
 package com.example.ocrscanner.entity.document;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
  * 문서 엔티티 = DB 테이블(document)과 1:1로 매핑되는 클래스.
  * Hibernate가 이 클래스 보고 테이블을 자동 생성한다.
  */
+@Getter
+@Setter
 @Entity
 public class Document {
 
@@ -26,27 +31,4 @@ public class Document {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    // === getter / setter ===
-    public Long getId() { return id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getFileName() { return fileName; }
-    public void setFileName(String fileName) { this.fileName = fileName; }
-
-    public String getContentType() { return contentType; }
-    public void setContentType(String contentType) { this.contentType = contentType; }
-
-    public long getFileSize() { return fileSize; }
-    public void setFileSize(long fileSize) { this.fileSize = fileSize; }
-
-    public String getOcrText() { return ocrText; }
-    public void setOcrText(String ocrText) { this.ocrText = ocrText; }
-
-    public String getTags() { return tags; }
-    public void setTags(String tags) { this.tags = tags; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
 }

@@ -3,8 +3,10 @@ package com.example.ocrscanner.service.document;
 import com.example.ocrscanner.entity.document.Document;
 import com.example.ocrscanner.exception.DocumentNotFoundException;
 import com.example.ocrscanner.repository.document.DocumentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.UUID;
  * Controller(요청 받기)와 Repository(DB 저장) 사이에서 실제 일을 처리한다.
  */
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class DocumentService {
 
     private final DocumentRepository repository;
@@ -27,11 +31,6 @@ public class DocumentService {
     // application.yml의 app.upload-dir 값을 여기에 주입
     @Value("${app.upload-dir}")
     private String uploadDir;
-
-    // 생성자 주입: 스프링이 DocumentRepository를 자동으로 넣어준다
-    public DocumentService(DocumentRepository repository) {
-        this.repository = repository;
-    }
 
     /**
      * 이미지 업로드 처리

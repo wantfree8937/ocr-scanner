@@ -1,6 +1,7 @@
 package com.example.ocrscanner.service.clova;
 
 import com.example.ocrscanner.config.ClovaOcrProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -19,14 +20,11 @@ import java.util.UUID;
  * 네이버 CLOVA OCR API를 호출해 이미지에서 텍스트를 추출하는 서비스.
  */
 @Service
+@RequiredArgsConstructor
 public class ClovaOcrService {
 
     private final RestClient restClient = RestClient.builder().build();
     private final ClovaOcrProperties properties;
-
-    public ClovaOcrService(ClovaOcrProperties properties) {
-        this.properties = properties;
-    }
 
     /**
      * 이미지 파일을 base64로 인코딩해 CLOVA OCR API에 전달하고,
