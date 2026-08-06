@@ -1,4 +1,4 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.entity.document;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

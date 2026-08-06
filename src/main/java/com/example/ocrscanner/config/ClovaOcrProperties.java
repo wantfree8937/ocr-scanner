@@ -1,4 +1,4 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

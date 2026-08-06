@@ -1,5 +1,8 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.service.document;
 
+import com.example.ocrscanner.entity.document.Document;
+import com.example.ocrscanner.exception.DocumentNotFoundException;
+import com.example.ocrscanner.repository.document.DocumentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

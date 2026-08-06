@@ -1,5 +1,8 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.controller.document;
 
+import com.example.ocrscanner.entity.document.Document;
+import com.example.ocrscanner.service.clova.ClovaOcrService;
+import com.example.ocrscanner.service.document.DocumentService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;

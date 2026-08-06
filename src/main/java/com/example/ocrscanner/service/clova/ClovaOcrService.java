@@ -1,5 +1,6 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.service.clova;
 
+import com.example.ocrscanner.config.ClovaOcrProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;

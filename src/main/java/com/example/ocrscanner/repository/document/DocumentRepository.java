@@ -1,5 +1,6 @@
-package com.example.ocrscanner;
+package com.example.ocrscanner.repository.document;
 
+import com.example.ocrscanner.entity.document.Document;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
