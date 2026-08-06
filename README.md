@@ -11,12 +11,13 @@
 - **태그 필터**: 태그 칩 클릭으로 필터링, 태그별 문서 수 표시
 - **페이지네이션**: 12개 단위로 목록 페이지 이동
 - **다크 모드**: localStorage에 설정 유지
+- **업로드 검증**: 이미지 파일만 허용 (최대 10MB), 전역 예외 처리로 에러 응답 통일
 
 ## 기술 스택
 
 | 구분 | 스택 |
 |---|---|
-| 백엔드 | Spring Boot 4.1.0 (Java 25), Spring Data JPA, Spring WebMVC |
+| 백엔드 | Spring Boot 4.1.0 (Java 25), Spring Data JPA, Spring WebMVC, Lombok |
 | 프론트엔드 | React 19, Vite 8 |
 | OCR | 네이버 CLOVA OCR (API Gateway 연동) |
 | DB | PostgreSQL 18 |
@@ -32,7 +33,8 @@ ocr-scanner/
 │   │   ├── ClovaOcrProperties.java         # CLOVA OCR 설정 바인딩
 │   │   └── CorsConfig.java
 │   ├── controller/document/
-│   │   └── DocumentController.java         # Controller
+│   │   ├── DocumentController.java         # 문서 CRUD Controller
+│   │   └── OcrController.java              # CLOVA OCR 실행 Controller
 │   ├── service/
 │   │   ├── document/DocumentService.java   # Service
 │   │   └── clova/ClovaOcrService.java      # CLOVA OCR 연동
@@ -40,8 +42,12 @@ ocr-scanner/
 │   │   └── DocumentRepository.java         # Repository (JPA)
 │   ├── entity/document/
 │   │   └── Document.java                   # Entity
+│   ├── dto/document/
+│   │   └── DocumentResponse.java           # API 응답 DTO (Entity 노출 방지)
 │   └── exception/
-│       └── DocumentNotFoundException.java
+│       ├── DocumentNotFoundException.java  # 404 예외
+│       ├── GlobalExceptionHandler.java     # 전역 예외 처리
+│       └── ErrorResponse.java              # 에러 응답 형식
 ├── src/main/resources/
 │   ├── application.example.yml     # 설정 예시 (커밋 대상)
 │   └── application.yml             # 실제 설정 (git에 커밋 금지)
