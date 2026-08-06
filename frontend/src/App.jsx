@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Tesseract from 'tesseract.js'
 import './App.css'
 
 // 백엔드(Spring Boot) 주소
@@ -14,8 +13,8 @@ function App() {
   const [title, setTitle] = useState('')      // 제목 입력
   const [tags, setTags] = useState('')        // 태그 입력
   const [ocrText, setOcrText] = useState('')  // OCR 결과 텍스트
+  const [lang, setLang] = useState('ko')      // OCR 언어 (ko/ja/zh)
   const [ocrRunning, setOcrRunning] = useState(false)
-  const [ocrProgress, setOcrProgress] = useState(0)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')      // 알림 메시지
   const [detail, setDetail] = useState(null)  // 상세보기 문서
@@ -40,22 +39,20 @@ function App() {
     setPreview(URL.createObjectURL(f))
     setTitle(f.name.replace(/\.[^.]+$/, ''))
     setOcrText('')
-    setOcrProgress(0)
   }
 
-  // Tesseract.js로 OCR 실행 (브라우저에서 이미지 → 텍스트)
+  // 네이버 CLOVA OCR API 호출 (백엔드에서 이미지 → 텍스트 추출)
   const runOcr = async () => {
-    if (!preview) return
+    if (!file) return
     setOcrRunning(true)
-    setOcrProgress(0)
     try {
-      const { data } = await Tesseract.recognize(preview, 'kor+eng', {
-        logger: (m) => {
-          if (m.status === 'recognizing text') setOcrProgress(Math.round(m.progress * 100))
-        },
-      })
-      setOcrText(data.text)
-      if (!data.text.trim()) showToast('텍스트가 인식되지 않았어요 😢')
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch(`${API}/ocr?lang=${lang}`, { method: 'POST', body: form })
+      if (!res.ok) throw new Error('OCR 요청이 실패했습니다')
+      const text = await res.text()
+      setOcrText(text)
+      if (!text.trim()) showToast('텍스트가 인식되지 않았어요 😢')
     } catch (err) {
       console.error(err)
       showToast('OCR 실행 실패: ' + err.message)
@@ -77,7 +74,7 @@ function App() {
       const res = await fetch(`${API}/documents`, { method: 'POST', body: form })
       if (res.ok) {
         showToast('저장 완료! 🎉')
-        setFile(null); setPreview(null); setTitle(''); setTags(''); setOcrText(''); setOcrProgress(0)
+        setFile(null); setPreview(null); setTitle(''); setTags(''); setOcrText('')
         loadDocs()
       }
     } finally {
@@ -127,10 +124,13 @@ function App() {
           </div>
           {preview && (
             <div className="ocr-area">
+              <select className="input lang-select" value={lang} onChange={(e) => setLang(e.target.value)}>
+                <option value="ko">한국어</option>
+              </select>
               <button className="btn btn-primary" onClick={runOcr} disabled={ocrRunning}>
-                {ocrRunning ? `OCR 인식 중... ${ocrProgress}%` : '🔍 OCR 실행'}
+                {ocrRunning ? 'CLOVA OCR 처리 중...' : '🔍 OCR 실행'}
               </button>
-              {ocrRunning && <progress value={ocrProgress} max="100" />}
+              {ocrRunning && <progress max="100" />}
               <textarea
                 className="ocr-result"
                 rows="5"

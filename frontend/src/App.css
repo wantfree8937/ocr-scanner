@@ -47,9 +47,9 @@ body {
 .ocr-result:focus { outline: 2px solid #6366f1; border-color: transparent; }
 
 /* ── 입력 필드 ── */
-.field-row { display: flex; gap: 8px; }
+.field-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .input {
-  flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
+  flex: 1; min-width: 0; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
   font-size: 14px; transition: border 0.15s;
 }
 .input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }

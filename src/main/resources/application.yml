@@ -22,3 +22,17 @@ server:
 # 업로드된 이미지가 저장될 폴더
 app:
   upload-dir: ./uploads
+
+# 네이버 CLOVA OCR API 설정 (언어별 도메인)
+clova:
+  ocr:
+    languages:
+      ko:
+        invoke-url: 'https://ro9801186o.apigw.ntruss.com/custom/v1/56706/c13e9bcbee42e96ee843f20b6413d993c172d8cbdd6b3b85f0a2d3b240c37034/general'
+        secret-key: 'ZnBISU1LR092QlVWRXdyZUZLeFdFWlJJZUhUbUVGTkc='
+      ja:
+        invoke-url: ''
+        secret-key: ''
+      zh:
+        invoke-url: ''
+        secret-key: ''
