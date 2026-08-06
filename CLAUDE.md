@@ -10,15 +10,21 @@
 ocr-scanner/
 ├── src/main/java/com/example/ocrscanner/   # Spring Boot 백엔드
 │   ├── OcrScannerApplication.java          # 앱 진입점
-│   ├── DocumentController.java             # Controller (HTTP 요청 처리)
-│   ├── DocumentService.java                # Service (비즈니스 로직)
-│   ├── DocumentRepository.java             # Repository (JPA, DB 접근)
-│   ├── Document.java                       # Entity (document 테이블 매핑)
-│   ├── CorsConfig.java                     # CORS 설정
-│   └── HelloController.java
+│   ├── controller/document/                # Controller (HTTP 요청 처리)
+│   │   ├── DocumentController.java         # 문서 CRUD API
+│   │   └── OcrController.java              # CLOVA OCR 실행 API
+│   ├── service/document/DocumentService.java   # 비즈니스 로직
+│   ├── service/clova/ClovaOcrService.java      # CLOVA OCR 연동
+│   ├── repository/document/DocumentRepository.java  # Repository (JPA, DB 접근)
+│   ├── entity/document/Document.java       # Entity (document 테이블 매핑)
+│   ├── dto/document/DocumentResponse.java  # API 응답 DTO
+│   ├── config/                             # CORS, CLOVA 설정
+│   └── exception/                          # 전역 예외 처리
 ├── src/main/resources/application.yml      # DB/서버 설정
 ├── frontend/                               # React + Vite 프론트엔드
-│   └── src/App.jsx                         # 업로드/OCR/검색 UI (Tesseract.js)
+│   └── src/
+│       ├── App.jsx                         # 상태 관리 + 조립
+│       └── components/document/            # UploadCard/DocumentList/DocumentModal
 └── uploads/                                # 업로드된 이미지 저장 폴더 (런타임 생성)
 ```
 
@@ -66,6 +72,8 @@ Base path: `/api/documents`
 | GET | `/api/documents/search?q=키워드` | 제목/OCR텍스트/태그 검색 |
 | GET | `/api/documents/{id}` | 문서 상세 조회 |
 | GET | `/api/documents/{id}/image` | 저장된 원본 이미지 조회 |
+| PATCH | `/api/documents/{id}` | 문서 수정 (JSON: title/tags/ocrText, 선택적) |
 | DELETE | `/api/documents/{id}` | 문서 삭제 (DB + 저장 파일) |
+| POST | `/api/ocr` | CLOVA OCR 실행 (multipart: file, lang 기본 ko) |
 
 OCR 텍스트 추출은 백엔드의 ClovaOcrService가 네이버 CLOVA OCR API를 호출해 수행하고, 결과 텍스트를 업로드/수정 요청에 함께 담아 저장한다.
