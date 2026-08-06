@@ -76,4 +76,13 @@ public class DocumentController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    /** ⑥ 수정: PATCH /api/documents/{id} (JSON body, 필드 전부 선택적) */
+    @PatchMapping("/api/documents/{id}")
+    public Document update(@PathVariable Long id, @RequestBody UpdateRequest request) {
+        return service.update(id, request.title(), request.tags(), request.ocrText());
+    }
+
+    /** PATCH 요청 body */
+    public record UpdateRequest(String title, String tags, String ocrText) {}
 }

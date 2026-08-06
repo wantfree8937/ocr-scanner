@@ -69,6 +69,15 @@ public class DocumentService {
                 .orElseThrow(() -> new RuntimeException("문서를 찾을 수 없습니다: " + id));
     }
 
+    /** 문서 수정: null이 아닌 필드만 반영 */
+    public Document update(Long id, String title, String tags, String ocrText) {
+        Document doc = findById(id);
+        if (title != null) doc.setTitle(title);
+        if (tags != null) doc.setTags(tags);
+        if (ocrText != null) doc.setOcrText(ocrText);
+        return repository.save(doc);
+    }
+
     /** 문서 삭제 (DB + 저장된 파일까지) */
     public void delete(Long id) throws IOException {
         Document doc = findById(id);

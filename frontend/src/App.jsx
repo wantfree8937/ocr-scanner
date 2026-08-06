@@ -18,6 +18,10 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')      // 알림 메시지
   const [detail, setDetail] = useState(null)  // 상세보기 문서
+  const [editing, setEditing] = useState(false)   // 상세 모달 편집 모드 여부
+  const [editTitle, setEditTitle] = useState('')
+  const [editTags, setEditTags] = useState('')
+  const [editOcr, setEditOcr] = useState('')
 
   // 화면 시작 시 문서 목록 불러오기
   const loadDocs = async () => {
@@ -100,6 +104,30 @@ function App() {
     }
   }
 
+  // 편집 시작: 현재 상세 문서 값으로 입력값 채우기
+  const startEdit = () => {
+    setEditTitle(detail.title || '')
+    setEditTags(detail.tags || '')
+    setEditOcr(detail.ocrText || '')
+    setEditing(true)
+  }
+
+  // 편집 저장
+  const saveEdit = async () => {
+    const res = await fetch(`${API}/documents/${detail.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: editTitle, tags: editTags, ocrText: editOcr }),
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setDetail(updated)
+      setEditing(false)
+      loadDocs()
+      showToast('수정 완료 ✏️')
+    }
+  }
+
   const fmtDate = (s) => {
     if (!s) return ''
     return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
@@ -110,6 +138,7 @@ function App() {
       <header className="header">
         <h1>📄 OCR 문서 스캐너</h1>
         <p>이미지를 업로드하면 텍스트를 자동 추출해서 저장하고 검색할 수 있어요</p>
+        <p className="lang-hint">🇰🇷 한국어 · 🇺🇸 영어 인식 지원</p>
       </header>
 
       {toast && <div className="toast">{toast}</div>}
@@ -183,21 +212,43 @@ function App() {
 
       {/* ── 상세 모달 ── */}
       {detail && (
-        <div className="modal-overlay" onClick={() => setDetail(null)}>
+        <div className="modal-overlay" onClick={() => { setDetail(null); setEditing(false) }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{detail.title}</h2>
+            {editing ? (
+              <input className="input edit-input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+            ) : (
+              <h2>{detail.title}</h2>
+            )}
             <img src={`${API}/documents/${detail.id}/image`} alt={detail.title} className="modal-img" />
             <div className="modal-meta">{fmtDate(detail.createdAt)} · {detail.fileSize} bytes</div>
-            {detail.tags && (
-              <div className="doc-tags">
-                {detail.tags.split(',').map((t) => <span key={t} className="tag">{t.trim()}</span>)}
-              </div>
+            {editing ? (
+              <input className="input edit-input" placeholder="태그 (콤마 구분)" value={editTags} onChange={(e) => setEditTags(e.target.value)} />
+            ) : (
+              detail.tags && (
+                <div className="doc-tags">
+                  {detail.tags.split(',').map((t) => <span key={t} className="tag">{t.trim()}</span>)}
+                </div>
+              )
             )}
             <h3>📝 OCR 텍스트</h3>
-            <pre className="ocr-full">{detail.ocrText || '(OCR 텍스트 없음)'}</pre>
+            {editing ? (
+              <textarea className="edit-textarea" rows="8" value={editOcr} onChange={(e) => setEditOcr(e.target.value)} />
+            ) : (
+              <pre className="ocr-full">{detail.ocrText || '(OCR 텍스트 없음)'}</pre>
+            )}
             <div className="modal-actions">
-              <button className="btn btn-danger" onClick={() => removeDoc(detail.id)}>🗑 삭제</button>
-              <button className="btn" onClick={() => setDetail(null)}>닫기</button>
+              {editing ? (
+                <>
+                  <button className="btn btn-save" onClick={saveEdit}>💾 저장</button>
+                  <button className="btn" onClick={() => setEditing(false)}>취소</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn" onClick={startEdit}>✏️ 편집</button>
+                  <button className="btn btn-danger" onClick={() => removeDoc(detail.id)}>🗑 삭제</button>
+                  <button className="btn" onClick={() => setDetail(null)}>닫기</button>
+                </>
+              )}
             </div>
           </div>
         </div>
