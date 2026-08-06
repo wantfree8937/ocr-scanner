@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import { API } from './api'
+import UploadCard from './components/UploadCard'
+import DocumentList from './components/DocumentList'
+import DocumentModal from './components/DocumentModal'
 
-// 백엔드(Spring Boot) 주소
-const API = 'http://localhost:8080/api'
 const PAGE_SIZE = 12 // 한 페이지당 문서 수
 
 function App() {
@@ -18,10 +20,6 @@ function App() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')      // 알림 메시지
   const [detail, setDetail] = useState(null)  // 상세보기 문서
-  const [editing, setEditing] = useState(false)   // 상세 모달 편집 모드 여부
-  const [editTitle, setEditTitle] = useState('')
-  const [editTags, setEditTags] = useState('')
-  const [editOcr, setEditOcr] = useState('')
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark') // 다크 모드 여부
   const [activeTag, setActiveTag] = useState(null) // 선택된 태그 필터 (null이면 전체)
   const [page, setPage] = useState(1) // 현재 페이지
@@ -42,16 +40,6 @@ function App() {
   const showToast = (msg) => {
     setToast(msg)
     setTimeout(() => setToast(''), 2500)
-  }
-
-  // 파일 선택 → 미리보기 표시 + 제목 자동 채우기
-  const onFileChange = (e) => {
-    const f = e.target.files[0]
-    if (!f) return
-    setFile(f)
-    setPreview(URL.createObjectURL(f))
-    setTitle(f.name.replace(/\.[^.]+$/, ''))
-    setOcrText('')
   }
 
   // 네이버 CLOVA OCR API 호출 (백엔드에서 이미지 → 텍스트 추출)
@@ -103,44 +91,18 @@ function App() {
     if (res.ok) setDocs(await res.json())
   }
 
-  // 삭제
-  const removeDoc = async (id) => {
-    if (!window.confirm('이 문서를 삭제할까요?')) return
-    const res = await fetch(`${API}/documents/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      showToast('삭제 완료')
-      setDetail(null)
-      loadDocs()
-    }
+  // 상세 모달에서 삭제 완료 시 호출
+  const onDocDeleted = () => {
+    showToast('삭제 완료')
+    setDetail(null)
+    loadDocs()
   }
 
-  // 편집 시작: 현재 상세 문서 값으로 입력값 채우기
-  const startEdit = () => {
-    setEditTitle(detail.title || '')
-    setEditTags(detail.tags || '')
-    setEditOcr(detail.ocrText || '')
-    setEditing(true)
-  }
-
-  // 편집 저장
-  const saveEdit = async () => {
-    const res = await fetch(`${API}/documents/${detail.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: editTitle, tags: editTags, ocrText: editOcr }),
-    })
-    if (res.ok) {
-      const updated = await res.json()
-      setDetail(updated)
-      setEditing(false)
-      loadDocs()
-      showToast('수정 완료 ✏️')
-    }
-  }
-
-  const fmtDate = (s) => {
-    if (!s) return ''
-    return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })
+  // 상세 모달에서 수정 완료 시 호출
+  const onDocUpdated = (updated) => {
+    setDetail(updated)
+    loadDocs()
+    showToast('수정 완료 ✏️')
   }
 
   // 전체 태그 목록 (중복 제거)
@@ -176,140 +138,32 @@ function App() {
       {toast && <div className="toast">{toast}</div>}
 
       <main className="main">
-        {/* ── 업로드 영역 ── */}
-        <section className="upload-card">
-          <h2>📤 새 문서 업로드</h2>
-          <div className="upload-row">
-            <input type="file" accept="image/*" onChange={onFileChange} />
-            {preview && <img className="preview" src={preview} alt="미리보기" />}
-          </div>
-          {preview && (
-            <div className="ocr-area">
-              <button className="btn btn-primary" onClick={runOcr} disabled={ocrRunning}>
-                {ocrRunning ? 'CLOVA OCR 처리 중...' : '🔍 OCR 실행'}
-              </button>
-              {ocrRunning && <progress max="100" />}
-              <textarea
-                className="ocr-result"
-                rows="5"
-                placeholder="OCR 결과 텍스트가 여기에 표시됩니다"
-                value={ocrText}
-                onChange={(e) => setOcrText(e.target.value)}
-              />
-              <div className="field-row">
-                <input className="input" placeholder="제목" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input className="input" placeholder="태그 (콤마 구분)" value={tags} onChange={(e) => setTags(e.target.value)} />
-              </div>
-              <button className="btn btn-save" onClick={saveDoc} disabled={saving}>
-                {saving ? '저장 중...' : '💾 저장하기'}
-              </button>
-            </div>
-          )}
-        </section>
+        <UploadCard
+          file={file} setFile={setFile}
+          preview={preview} setPreview={setPreview}
+          title={title} setTitle={setTitle}
+          tags={tags} setTags={setTags}
+          ocrText={ocrText} setOcrText={setOcrText}
+          ocrRunning={ocrRunning} runOcr={runOcr}
+          saveDoc={saveDoc} saving={saving}
+        />
 
-        {/* ── 검색 + 목록 영역 ── */}
-        <section className="list-section">
-          <p className="doc-count">📄 총 {visibleDocs.length}개 문서</p>
-          <div className="search-row">
-            <input
-              className="input search-input"
-              placeholder="🔎 제목·태그·내용 검색"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && search()}
-            />
-            <button className="btn btn-primary" onClick={search}>검색</button>
-          </div>
-          {allTags.length > 0 && (
-            <div className="tag-filter">
-              {allTags.map((t) => (
-                <button
-                  key={t}
-                  className={`filter-chip${activeTag === t ? ' active' : ''}`}
-                  onClick={() => { setActiveTag((cur) => (cur === t ? null : t)); setPage(1) }}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="doc-grid">
-            {visibleDocs.length === 0 && <p className="empty">저장된 문서가 없어요. 첫 문서를 업로드해보세요! 📄</p>}
-            {pagedDocs.map((d) => (
-              <div key={d.id} className="doc-card" onClick={() => setDetail(d)}>
-                <img src={`${API}/documents/${d.id}/image`} alt={d.title} className="doc-thumb" />
-                <div className="doc-info">
-                  <div className="doc-title">{d.title}</div>
-                  <div className="doc-meta">{fmtDate(d.createdAt)}</div>
-                  {d.tags && (
-                    <div className="doc-tags">
-                      {d.tags.split(',').map((t) => <span key={t} className="tag">{t.trim()}</span>)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button className="page-btn" disabled={page <= 1} onClick={() => setPage(page - 1)}>◀ 이전</button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  className={`page-btn${p === page ? ' active' : ''}`}
-                  onClick={() => setPage(p)}
-                >
-                  {p}
-                </button>
-              ))}
-              <button className="page-btn" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>다음 ▶</button>
-            </div>
-          )}
-        </section>
+        <DocumentList
+          visibleDocs={visibleDocs} pagedDocs={pagedDocs}
+          allTags={allTags} activeTag={activeTag} setActiveTag={setActiveTag}
+          query={query} setQuery={setQuery} onSearch={search}
+          page={page} totalPages={totalPages} setPage={setPage}
+          onOpenDetail={setDetail}
+        />
       </main>
 
-      {/* ── 상세 모달 ── */}
       {detail && (
-        <div className="modal-overlay" onClick={() => { setDetail(null); setEditing(false) }}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            {editing ? (
-              <input className="input edit-input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-            ) : (
-              <h2>{detail.title}</h2>
-            )}
-            <img src={`${API}/documents/${detail.id}/image`} alt={detail.title} className="modal-img" />
-            <div className="modal-meta">{fmtDate(detail.createdAt)} · {detail.fileSize} bytes</div>
-            {editing ? (
-              <input className="input edit-input" placeholder="태그 (콤마 구분)" value={editTags} onChange={(e) => setEditTags(e.target.value)} />
-            ) : (
-              detail.tags && (
-                <div className="doc-tags">
-                  {detail.tags.split(',').map((t) => <span key={t} className="tag">{t.trim()}</span>)}
-                </div>
-              )
-            )}
-            <h3>📝 OCR 텍스트</h3>
-            {editing ? (
-              <textarea className="edit-textarea" rows="8" value={editOcr} onChange={(e) => setEditOcr(e.target.value)} />
-            ) : (
-              <pre className="ocr-full">{detail.ocrText || '(OCR 텍스트 없음)'}</pre>
-            )}
-            <div className="modal-actions">
-              {editing ? (
-                <>
-                  <button className="btn btn-save" onClick={saveEdit}>💾 저장</button>
-                  <button className="btn" onClick={() => setEditing(false)}>취소</button>
-                </>
-              ) : (
-                <>
-                  <button className="btn" onClick={startEdit}>✏️ 편집</button>
-                  <button className="btn btn-danger" onClick={() => removeDoc(detail.id)}>🗑 삭제</button>
-                  <button className="btn" onClick={() => setDetail(null)}>닫기</button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <DocumentModal
+          detail={detail}
+          onClose={() => setDetail(null)}
+          onDeleted={onDocDeleted}
+          onUpdated={onDocUpdated}
+        />
       )}
     </div>
   )
