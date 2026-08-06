@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import { API } from './api'
-import UploadCard from './components/UploadCard'
-import DocumentList from './components/DocumentList'
-import DocumentModal from './components/DocumentModal'
+import UploadCard from './components/document/UploadCard'
+import DocumentList from './components/document/DocumentList'
+import DocumentModal from './components/document/DocumentModal'
 
 const PAGE_SIZE = 12 // 한 페이지당 문서 수
 
