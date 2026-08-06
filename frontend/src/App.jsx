@@ -3,6 +3,7 @@ import './App.css'
 
 // 백엔드(Spring Boot) 주소
 const API = 'http://localhost:8080/api'
+const PAGE_SIZE = 12 // 한 페이지당 문서 수
 
 function App() {
   // ── 상태(state)들: 화면에 표시되는 모든 데이터 ──
@@ -24,6 +25,7 @@ function App() {
   const [editOcr, setEditOcr] = useState('')
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark') // 다크 모드 여부
   const [activeTag, setActiveTag] = useState(null) // 선택된 태그 필터 (null이면 전체)
+  const [page, setPage] = useState(1) // 현재 페이지
 
   // 화면 시작 시 문서 목록 불러오기
   const loadDocs = async () => {
@@ -96,6 +98,7 @@ function App() {
 
   // 검색
   const search = async () => {
+    setPage(1)
     if (!query.trim()) return loadDocs()
     const res = await fetch(`${API}/documents/search?q=${encodeURIComponent(query)}`)
     if (res.ok) setDocs(await res.json())
@@ -150,6 +153,15 @@ function App() {
   const visibleDocs = activeTag
     ? docs.filter((d) => d.tags && d.tags.split(',').map((t) => t.trim()).includes(activeTag))
     : docs
+
+  // 페이지네이션: 전체 페이지 수 계산 + 현재 페이지에 보여줄 문서만 잘라내기
+  const totalPages = Math.max(1, Math.ceil(visibleDocs.length / PAGE_SIZE))
+  const pagedDocs = visibleDocs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // 필터링 결과로 페이지 범위를 벗어나면 마지막 페이지로 자동 조정
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [totalPages, page])
 
   return (
     <div className="app">
@@ -218,7 +230,7 @@ function App() {
                 <button
                   key={t}
                   className={`filter-chip${activeTag === t ? ' active' : ''}`}
-                  onClick={() => setActiveTag((cur) => (cur === t ? null : t))}
+                  onClick={() => { setActiveTag((cur) => (cur === t ? null : t)); setPage(1) }}
                 >
                   {t}
                 </button>
@@ -227,7 +239,7 @@ function App() {
           )}
           <div className="doc-grid">
             {visibleDocs.length === 0 && <p className="empty">저장된 문서가 없어요. 첫 문서를 업로드해보세요! 📄</p>}
-            {visibleDocs.map((d) => (
+            {pagedDocs.map((d) => (
               <div key={d.id} className="doc-card" onClick={() => setDetail(d)}>
                 <img src={`${API}/documents/${d.id}/image`} alt={d.title} className="doc-thumb" />
                 <div className="doc-info">
@@ -242,6 +254,21 @@ function App() {
               </div>
             ))}
           </div>
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button className="page-btn" disabled={page <= 1} onClick={() => setPage(page - 1)}>◀ 이전</button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  className={`page-btn${p === page ? ' active' : ''}`}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </button>
+              ))}
+              <button className="page-btn" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>다음 ▶</button>
+            </div>
+          )}
         </section>
       </main>
 
