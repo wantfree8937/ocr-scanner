@@ -1,0 +1,28 @@
+# ⚠️ 실제 키는 application.yml에 넣고, 이 파일은 "양식"으로만 사용 (git에 올라감)
+spring:
+  application:
+    name: ocr-scanner
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ocr_scanner
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+
+app:
+  upload-dir: ./uploads
+
+clova:
+  ocr:
+    languages:
+      ko:
+        invoke-url: 'YOUR_INVOKE_URL_HERE'
+        secret-key: 'YOUR_SECRET_KEY_HERE'
