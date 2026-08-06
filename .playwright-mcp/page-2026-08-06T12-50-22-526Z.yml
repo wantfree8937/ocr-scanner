@@ -1,0 +1,16 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - button "🌙" [ref=e5] [cursor=pointer]
+    - heading "📄 OCR 문서 스캐너" [level=1] [ref=e6]
+    - paragraph [ref=e7]: 이미지를 업로드하면 텍스트를 자동 추출해서 저장하고 검색할 수 있어요
+    - paragraph [ref=e8]: 🇰🇷 한국어 · 🇺🇸 영어 인식 지원
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "📤 새 문서 업로드" [level=2] [ref=e11]
+      - button "Choose File" [ref=e13]
+    - generic [ref=e14]:
+      - paragraph [ref=e15]: 📄 총 0개 문서
+      - generic [ref=e16]:
+        - textbox "🔎 제목·태그·내용 검색" [ref=e17]
+        - button "검색" [ref=e18] [cursor=pointer]
+      - paragraph [ref=e20]: 저장된 문서가 없어요. 첫 문서를 업로드해보세요! 📄

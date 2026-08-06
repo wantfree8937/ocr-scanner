@@ -1,0 +1,74 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - button "☀️" [active] [ref=e79] [cursor=pointer]
+    - heading "📄 OCR 문서 스캐너" [level=1] [ref=e6]
+    - paragraph [ref=e7]: 이미지를 업로드하면 텍스트를 자동 추출해서 저장하고 검색할 수 있어요
+    - paragraph [ref=e8]: 🇰🇷 한국어 · 🇺🇸 영어 인식 지원
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "📤 새 문서 업로드" [level=2] [ref=e11]
+      - button "Choose File" [ref=e13]
+    - generic [ref=e14]:
+      - paragraph [ref=e15]: 📄 총 6개 문서
+      - generic [ref=e16]:
+        - textbox "🔎 제목·태그·내용 검색" [ref=e17]
+        - button "검색" [ref=e18] [cursor=pointer]
+      - generic [ref=e21]:
+        - button "영수증" [ref=e22] [cursor=pointer]
+        - button "생활" [ref=e23] [cursor=pointer]
+        - button "메모" [ref=e24] [cursor=pointer]
+        - button "독서" [ref=e25] [cursor=pointer]
+        - button "공부" [ref=e26] [cursor=pointer]
+        - button "부트캠프" [ref=e27] [cursor=pointer]
+        - button "업무" [ref=e28] [cursor=pointer]
+        - button "회의" [ref=e29] [cursor=pointer]
+        - button "스프링" [ref=e30] [cursor=pointer]
+      - generic [ref=e19]:
+        - generic [ref=e31] [cursor=pointer]:
+          - img "병원 진료비 영수증" [ref=e32]
+          - generic [ref=e33]:
+            - generic [ref=e34]: 병원 진료비 영수증
+            - generic [ref=e35]: 26. 8. 6. 오후 9:49
+            - generic [ref=e36]:
+              - generic [ref=e37]: 영수증
+              - generic [ref=e38]: 생활
+        - generic [ref=e39] [cursor=pointer]:
+          - 'img "책 메모: 자바의 신" [ref=e40]'
+          - generic [ref=e41]:
+            - generic [ref=e42]: "책 메모: 자바의 신"
+            - generic [ref=e43]: 26. 8. 6. 오후 9:49
+            - generic [ref=e44]:
+              - generic [ref=e45]: 메모
+              - generic [ref=e46]: 독서
+        - generic [ref=e47] [cursor=pointer]:
+          - img "부트캠프 과제 제출" [ref=e48]
+          - generic [ref=e49]:
+            - generic [ref=e50]: 부트캠프 과제 제출
+            - generic [ref=e51]: 26. 8. 6. 오후 9:49
+            - generic [ref=e52]:
+              - generic [ref=e53]: 공부
+              - generic [ref=e54]: 부트캠프
+        - generic [ref=e55] [cursor=pointer]:
+          - 'img "회의록: OCR 스캐너 기획" [ref=e56]'
+          - generic [ref=e57]:
+            - generic [ref=e58]: "회의록: OCR 스캐너 기획"
+            - generic [ref=e59]: 26. 8. 6. 오후 9:49
+            - generic [ref=e60]:
+              - generic [ref=e61]: 업무
+              - generic [ref=e62]: 회의
+        - generic [ref=e63] [cursor=pointer]:
+          - img "CU 영수증 8월 6일" [ref=e64]
+          - generic [ref=e65]:
+            - generic [ref=e66]: CU 영수증 8월 6일
+            - generic [ref=e67]: 26. 8. 6. 오후 9:49
+            - generic [ref=e68]:
+              - generic [ref=e69]: 영수증
+              - generic [ref=e70]: 생활
+        - generic [ref=e71] [cursor=pointer]:
+          - img "스프링 부트 공부 노트" [ref=e72]
+          - generic [ref=e73]:
+            - generic [ref=e74]: 스프링 부트 공부 노트
+            - generic [ref=e75]: 26. 8. 6. 오후 9:49
+            - generic [ref=e76]:
+              - generic [ref=e77]: 공부
+              - generic [ref=e78]: 스프링
