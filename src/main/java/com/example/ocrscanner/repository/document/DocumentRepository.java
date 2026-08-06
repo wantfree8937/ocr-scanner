@@ -11,12 +11,6 @@ import java.util.List;
  */
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-    // 제목에 키워드가 포함된 문서 찾기 (나중에 검색 기능에 사용)
-    List<Document> findByTitleContainingIgnoreCase(String keyword);
-
-    // OCR 텍스트에 키워드가 포함된 문서 찾기
-    List<Document> findByOcrTextContainingIgnoreCase(String keyword);
-
     // 제목 OR OCR텍스트 OR 태그 중 하나라도 키워드를 포함하면 찾기 (검색 기능)
     List<Document> findByTitleContainingIgnoreCaseOrOcrTextContainingIgnoreCaseOrTagsContainingIgnoreCase(
             String titleKeyword, String ocrKeyword, String tagsKeyword);

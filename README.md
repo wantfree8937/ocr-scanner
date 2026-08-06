@@ -27,14 +27,21 @@
 ```
 ocr-scanner/
 ├── src/main/java/com/example/ocrscanner/
-│   ├── DocumentController.java     # Controller
-│   ├── DocumentService.java        # Service
-│   ├── DocumentRepository.java     # Repository (JPA)
-│   ├── Document.java               # Entity
-│   ├── ClovaOcrService.java        # CLOVA OCR 연동
-│   ├── ClovaOcrProperties.java     # CLOVA OCR 설정 바인딩
-│   ├── DocumentNotFoundException.java
-│   └── CorsConfig.java
+│   ├── OcrScannerApplication.java          # 앱 진입점
+│   ├── config/
+│   │   ├── ClovaOcrProperties.java         # CLOVA OCR 설정 바인딩
+│   │   └── CorsConfig.java
+│   ├── controller/document/
+│   │   └── DocumentController.java         # Controller
+│   ├── service/
+│   │   ├── document/DocumentService.java   # Service
+│   │   └── clova/ClovaOcrService.java      # CLOVA OCR 연동
+│   ├── repository/document/
+│   │   └── DocumentRepository.java         # Repository (JPA)
+│   ├── entity/document/
+│   │   └── Document.java                   # Entity
+│   └── exception/
+│       └── DocumentNotFoundException.java
 ├── src/main/resources/
 │   ├── application.example.yml     # 설정 예시 (커밋 대상)
 │   └── application.yml             # 실제 설정 (git에 커밋 금지)
@@ -42,7 +49,7 @@ ocr-scanner/
 └── frontend/src/
     ├── App.jsx
     ├── api.js
-    └── components/
+    └── components/document/
         ├── UploadCard.jsx
         ├── DocumentList.jsx
         └── DocumentModal.jsx
@@ -90,10 +97,9 @@ H2 인메모리 DB로 실행되며, CLOVA OCR 호출은 mock 처리됩니다.
 
 ## API 목록
 
-Base path: `/api/documents`
-
 | Method | Path | 설명 |
 |---|---|---|
+| POST | `/api/ocr` | 이미지에서 텍스트 추출 (multipart/form-data: file, lang) |
 | POST | `/api/documents` | 문서 업로드 (multipart/form-data: file, title, tags, ocrText) |
 | GET | `/api/documents` | 전체 문서 목록 (최신순) |
 | GET | `/api/documents/search?q=키워드` | 제목/OCR텍스트/태그 검색 |

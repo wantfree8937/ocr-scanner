@@ -24,7 +24,7 @@ ocr-scanner/
 
 **기술 스택**
 - 백엔드: Spring Boot 4.1.0, Java 25, Spring Data JPA, PostgreSQL 18
-- 프론트엔드: React 19 + Vite 8, OCR은 클라이언트 사이드에서 tesseract.js로 처리
+- 프론트엔드: React 19 + Vite 8, OCR은 백엔드에서 네이버 CLOVA OCR API로 처리
 - lint: oxlint
 
 ## 실행 명령어
@@ -68,4 +68,4 @@ Base path: `/api/documents`
 | GET | `/api/documents/{id}/image` | 저장된 원본 이미지 조회 |
 | DELETE | `/api/documents/{id}` | 문서 삭제 (DB + 저장 파일) |
 
-OCR 텍스트 추출 자체는 백엔드가 아니라 프론트엔드에서 tesseract.js로 수행한 뒤, 결과 텍스트를 업로드 요청에 함께 담아 보낸다.
+OCR 텍스트 추출은 백엔드의 ClovaOcrService가 네이버 CLOVA OCR API를 호출해 수행하고, 결과 텍스트를 업로드/수정 요청에 함께 담아 저장한다.
