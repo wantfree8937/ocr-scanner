@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ocr-scanner
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ocr_scanner
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+# 업로드된 이미지가 저장될 폴더
+app:
+  upload-dir: ./uploads
