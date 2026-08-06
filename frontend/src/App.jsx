@@ -22,6 +22,7 @@ function App() {
   const [editTitle, setEditTitle] = useState('')
   const [editTags, setEditTags] = useState('')
   const [editOcr, setEditOcr] = useState('')
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark') // 다크 모드 여부
 
   // 화면 시작 시 문서 목록 불러오기
   const loadDocs = async () => {
@@ -29,6 +30,12 @@ function App() {
     if (res.ok) setDocs(await res.json())
   }
   useEffect(() => { loadDocs() }, [])
+
+  // 다크 모드 상태 변경 시 body에 반영 + 저장 (마운트 시에도 초기 테마 적용)
+  useEffect(() => {
+    document.body.classList.toggle('dark', dark)
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   const showToast = (msg) => {
     setToast(msg)
@@ -136,6 +143,9 @@ function App() {
   return (
     <div className="app">
       <header className="header">
+        <button className="theme-toggle" onClick={() => setDark((d) => !d)}>
+          {dark ? '☀️' : '🌙'}
+        </button>
         <h1>📄 OCR 문서 스캐너</h1>
         <p>이미지를 업로드하면 텍스트를 자동 추출해서 저장하고 검색할 수 있어요</p>
         <p className="lang-hint">🇰🇷 한국어 · 🇺🇸 영어 인식 지원</p>
