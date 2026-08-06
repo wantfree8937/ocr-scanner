@@ -66,7 +66,7 @@ public class DocumentService {
     /** id로 문서 1개 조회 */
     public Document findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("문서를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new DocumentNotFoundException("문서를 찾을 수 없습니다: " + id));
     }
 
     /** 문서 수정: null이 아닌 필드만 반영 */

@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+# 테스트에서는 CLOVA OCR을 실제로 호출하지 않으므로 키를 비워둔다
+clova:
+  ocr:
+    languages:
+      ko:
+        invoke-url: ''
+        secret-key: ''
