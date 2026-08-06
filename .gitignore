@@ -42,3 +42,4 @@ uploads/
 # 로컬 설정 (API 키 포함 - 절대 커밋 금지)
 src/main/resources/application.yml
 .claude-task-*.md
+.playwright-mcp/
