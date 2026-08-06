@@ -14,7 +14,6 @@ function App() {
   const [title, setTitle] = useState('')      // 제목 입력
   const [tags, setTags] = useState('')        // 태그 입력
   const [ocrText, setOcrText] = useState('')  // OCR 결과 텍스트
-  const [lang, setLang] = useState('ko')      // OCR 언어 (ko/ja/zh)
   const [ocrRunning, setOcrRunning] = useState(false)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')      // 알림 메시지
@@ -62,7 +61,7 @@ function App() {
     try {
       const form = new FormData()
       form.append('file', file)
-      const res = await fetch(`${API}/ocr?lang=${lang}`, { method: 'POST', body: form })
+      const res = await fetch(`${API}/ocr`, { method: 'POST', body: form })
       if (!res.ok) throw new Error('OCR 요청이 실패했습니다')
       const text = await res.text()
       setOcrText(text)
@@ -186,9 +185,6 @@ function App() {
           </div>
           {preview && (
             <div className="ocr-area">
-              <select className="input lang-select" value={lang} onChange={(e) => setLang(e.target.value)}>
-                <option value="ko">한국어</option>
-              </select>
               <button className="btn btn-primary" onClick={runOcr} disabled={ocrRunning}>
                 {ocrRunning ? 'CLOVA OCR 처리 중...' : '🔍 OCR 실행'}
               </button>
